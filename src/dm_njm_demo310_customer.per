@@ -1,0 +1,31 @@
+SCHEMA njm_demo310
+LAYOUT ( STYLE="main2" )
+GRID
+{
+Customer Code:   [f001    ]
+customer Name:   [f002                        ]
+contact Name:    [f003                        ]
+Email Address:   [f004                                   ]
+Web passwd:      [f005             ]
+Del addr:        [f006]             Inv addr:        [f007]
+<G "Invoicing"                                                             >
+ Discount Code:   [f8]               Credit Limit:    [f009             ]
+ Total Invoices:  [f010             ]Outstanding Val: [f011             ]
+}
+END -- GRID
+
+TABLES
+customer
+
+ATTRIBUTES
+f001 = customer.customer_code;
+f002 = customer.customer_name;
+f003 = customer.contact_name;
+f004 = customer.email;
+f005 = customer.web_passwd, INVISIBLE;
+f006 = customer.del_addr;
+f007 = customer.inv_addr;
+f8 = customer.disc_code;
+f009 = customer.credit_limit;
+f010 = customer.total_invoices;
+f011 = customer.outstanding_amount;

@@ -1,10 +1,7 @@
 
 -- A Basic dynamic maintenance program.
--- Does:
---	find, update, insert, delete
---
--- To Do:
---	locking
+-- Does: find, update, insert, delete
+-- To Do: locking, sample, listing report
 
 -- Command Args:
 -- 1: MDI / SDI 
@@ -41,8 +38,7 @@ DEFINE m_sql_handle base.SqlHandle
 DEFINE m_dialog ui.Dialog
 DEFINE m_row_count, m_row_cur INTEGER
 DEFINE m_dbname STRING
-DEFINE m_allowedActions CHAR(6) --Y/N for Find / List / Update / Insert / Delete / Sample
-                              -- NNYNNN = Only update allowed.
+DEFINE m_allowedActions CHAR(6) --Y/N = Find / Update / Insert / Delete / Sample / List  -- eg: YNNNNN = enquiry only.
 MAIN
 	CALL gl_lib.gl_setInfo(C_VER, C_APP_SPLASH, C_APP_ICON, NULL, C_PRGDESC, C_PRGAUTH)
 	CALL gl_lib.gl_init(ARG_VAL(1),"default",TRUE)
@@ -55,15 +51,15 @@ MAIN
 	LET m_row_cur = 0
 	LET m_row_count = 0
 	CALL mk_sql( "1=2" ) -- not fetching any data.
-	CALL mk_form.mk_form(m_tab, 10, m_fields) -- 10 fields by folder page
+	CALL mk_form.init_form(m_dbname, m_tab, 10, m_fields) -- 10 fields by folder page
 	CALL gl_lib.gl_titleWin(NULL)
 	CALL ui.Interface.setText( gl_lib.gl_progdesc )
 	MENU
 		BEFORE MENU
-			CALL app_lib.setActions(m_row_cur,m_row_count, m_allowedActions)
+			CALL app_lib.setActions(m_row_cur, m_row_count, m_allowedActions)
 		ON ACTION insert		CALL inpt(1)
-		ON ACTION update		CALL inpt(0)
-		ON ACTION delete		CALL sql_del()
+		ON ACTION update		IF m_row_cur > 0 THEN CALL inpt(0) END IF
+		ON ACTION delete		IF m_row_cur > 0 THEN CALL sql_del() END IF
 		ON ACTION find			CALL constrct()
 			CALL app_lib.setActions(m_row_cur,m_row_count, m_allowedActions)
 		ON ACTION firstrow	CALL get_row(SQL_FIRST)
@@ -85,24 +81,22 @@ FUNCTION init_args()
 	LET m_dbname = ARG_VAL(2)
 	LET m_tab = ARG_VAL(3)
 	LET m_key_nam = ARG_VAL(4)
-	LET m_allowedActions  = ARG_VAL(5)
-
+	LET m_allowedActions = ARG_VAL(5)
 	IF m_dbname IS NOT NULL THEN
 		CALL gl_db.gldb_connect( m_dbname )
 	ELSE 
 		CALL gl_lib.gl_errPopup(SFMT(%"Invalid Database Name '%1'!",m_dbname))
 		CALL gl_lib.gl_exitProgram(1,%"invalid Database")
 	END IF
-
 	IF m_tab IS NULL THEN 
 		CALL gl_lib.gl_errPopup(SFMT(%"Invalid Table '%1'!",m_tab))
 		CALL gl_lib.gl_exitProgram(1,%"invalid table")
 	END IF
-
 	IF m_key_nam IS NULL THEN 
 		CALL gl_lib.gl_errPopup(SFMT(%"Invalid Key Name '%1'!",m_key_nam))
 		CALL gl_lib.gl_exitProgram(1,%"invalid key name")
 	END IF
+	IF m_allowedActions IS NULL THEN LET m_allowedActions = "YYYYYY" END IF
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION mk_sql(l_where STRING)
@@ -121,9 +115,9 @@ FUNCTION mk_sql(l_where STRING)
 	CALL m_sql_handle.openScrollCursor()
 	CALL m_fields.clear()
 	FOR x = 1 TO m_sql_handle.getResultCount()
-		LET m_fields[x].name = m_sql_handle.getResultName(x)
+		LET m_fields[x].colname = m_sql_handle.getResultName(x)
 		LET m_fields[x].type = m_sql_handle.getResultType(x)
-		IF m_fields[x].name.trim() = m_key_nam.trim() THEN
+		IF m_fields[x].colname.trim() = m_key_nam.trim() THEN
 			LET m_key_fld = x
 		END IF
 	END FOR
@@ -145,8 +139,7 @@ FUNCTION mk_sql(l_where STRING)
 	MESSAGE "Rows "||m_row_cur||" of "||m_row_count
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION get_row(l_row)
-	DEFINE l_row INTEGER
+FUNCTION get_row(l_row INTEGER)
 	IF l_row > m_row_count THEN LET l_row = m_row_count END IF
 	CASE l_row
 		WHEN SQL_FIRST
@@ -169,7 +162,6 @@ FUNCTION get_row(l_row)
 			CALL m_sql_handle.fetchAbsolute(l_row)
 			LET m_row_cur = l_row
 	END CASE
-
 	IF STATUS = 0 THEN
 		CALL mk_form.update_form_value( m_sql_handle )
 		MESSAGE SFMT(%"Rows %1 of %2",m_row_cur,m_row_count)
@@ -198,13 +190,10 @@ FUNCTION constrct()
 				EXIT WHILE
 		END CASE
 	END WHILE
-	IF int_flag THEN
-		LET int_flag = FALSE
-		RETURN 
-	END IF
+	IF int_flag THEN RETURN END IF
 
 	FOR x = 1 TO m_fields.getLength()
-		LET l_query = m_dialog.getQueryFromField(m_fields[x].name)
+		LET l_query = m_dialog.getQueryFromField(m_fields[x].colname)
 		IF l_query.getLength() > 0 THEN
 			IF l_sql IS NOT NULL THEN LET l_sql = l_sql.append(" AND ") END IF
 			LET l_sql = l_sql.append(l_query)
@@ -224,10 +213,9 @@ FUNCTION inpt(l_new BOOLEAN)
 	ELSE
 		IF m_row_cur = 0 THEN RETURN END IF
 		FOR x = 1 TO m_fields.getLength()
-			--DISPLAY "Field:",m_fields[x].name,":",m_fields[x].type
-			CALL m_dialog.setFieldValue(m_tab||"."||m_fields[x].name, m_sql_handle.getResultValue(x))
+			CALL m_dialog.setFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname, m_sql_handle.getResultValue(x))
 			IF x = m_key_fld THEN
-				CALL m_dialog.setFieldActive(m_fields[x].name, FALSE )
+				CALL m_dialog.setFieldActive(m_fields[x].colname, FALSE )
 			END IF
 		END FOR
 	END IF
@@ -253,17 +241,15 @@ FUNCTION inpt(l_new BOOLEAN)
 				EXIT WHILE
 		END CASE
 	END WHILE
-	IF int_flag THEN LET int_flag = FALSE END IF
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION sql_update()
 	DEFINE l_sql, l_val, l_key STRING
 	DEFINE x SMALLINT
-
 	LET l_sql = "update "||m_tab||" SET ("
 	FOR x = 1 TO m_fields.getLength()
 		IF x != m_key_fld THEN
-			LET l_sql = l_sql.append( m_fields[x].name )
+			LET l_sql = l_sql.append( m_fields[x].colname )
 			IF x != m_fields.getLength() THEN
 				LET l_sql = l_sql.append(",")
 			END IF
@@ -273,16 +259,16 @@ FUNCTION sql_update()
 	FOR x = 1 TO m_fields.getLength()
 		IF x != m_key_fld THEN
 			IF mk_form.m_fld_props[x].numeric THEN
-				LET l_val = NVL(m_dialog.getFieldValue(m_tab||"."||m_fields[x].name) ,"NULL")
+				LET l_val = NVL(m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname) ,"NULL")
 			ELSE
-				LET l_val = NVL("'"||m_dialog.getFieldValue(m_tab||"."||m_fields[x].name)||"'" ,"NULL")
+				LET l_val = NVL("'"||m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
 			END IF
 			LET l_sql = l_sql.append( l_val )
 			IF x != m_fields.getLength() THEN
 				LET l_sql = l_sql.append(",")
 			END IF
 		ELSE
-			LET l_key = m_dialog.getFieldValue(m_tab||"."||m_fields[x].name)
+			LET l_key = m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname)
 		END IF
 	END FOR
 	LET l_sql = l_sql.append(") where "||m_key_nam||" = ?")
@@ -292,9 +278,8 @@ FUNCTION sql_update()
 	CATCH
 	END TRY
 	IF SQLCA.sqlcode = 0 THEN
-		LET x = m_row_cur
 		CALL mk_sql( m_where )
-		CALL get_row(x)
+		CALL get_row(m_row_cur)
 	ELSE
 		CALL gl_lib.gl_errPopup(SFMT(%"Failed to update record!\n%1!",SQLERRMESSAGE))
 	END IF
@@ -305,14 +290,14 @@ FUNCTION sql_insert()
 	DEFINE x SMALLINT
 	LET l_sql = "insert into "||m_tab||" ("
 	FOR x = 1 TO m_fields.getLength()
-		LET l_sql = l_sql.append( m_fields[x].name )
+		LET l_sql = l_sql.append( m_fields[x].colname )
 		IF x != m_fields.getLength() THEN
 			LET l_sql = l_sql.append(",")
 		END IF
 	END FOR
 	LET l_sql = l_sql.append(") values(")
 	FOR x = 1 TO m_fields.getLength()
-		LET l_val = NVL("'"||m_dialog.getFieldValue(m_tab||"."||m_fields[x].name)||"'" ,"NULL")
+		LET l_val = NVL("'"||m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
 		LET l_sql = l_sql.append( l_val )
 		IF x != m_fields.getLength() THEN
 			LET l_sql = l_sql.append(",")
@@ -334,7 +319,6 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION sql_del()
 	DEFINE l_sql, l_val STRING
-	IF m_row_cur = 0 THEN RETURN END IF
 	LET l_val = m_sql_handle.getResultValue(m_key_fld)
 	LET l_sql = "DELETE FROM "||m_tab||" WHERE "||m_key_nam||" = ?"
 	IF gl_lib.gl_winQuestion(%"Confirm",

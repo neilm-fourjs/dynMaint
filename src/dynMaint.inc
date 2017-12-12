@@ -1,9 +1,11 @@
 
 TYPE t_fields RECORD
-		name STRING,
+		colname STRING,
 		type STRING
 	END RECORD
 TYPE t_fld_props RECORD
+		tabname STRING,
+		colname STRING,
 		label STRING,
 		len SMALLINT,
 		numeric BOOLEAN,

@@ -9,10 +9,10 @@
   </TopMenuGroup>
   <TopMenuGroup text="Options" >
     <TopMenuCommand name="find"/>
-    <TopMenuCommand name="list"/>
+    <!-- TopMenuCommand name="list"/-->
     <TopMenuSeparator/>
     <TopMenuCommand name="insert" />
-    <TopMenuCommand name="sample" />
+    <!-- TopMenuCommand name="sample" /-->
     <TopMenuCommand name="delete" />
     <TopMenuCommand name="update" />
   </TopMenuGroup>
