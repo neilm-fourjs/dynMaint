@@ -8,7 +8,7 @@
 -- 2: Database name
 -- 3: Table name
 -- 4: Primary Key name
--- 5: Allowed actions
+-- 5: Allowed actions: Y/N > Find / Update / Insert / Delete / Sample / List  -- eg: YNNNNN = enquiry only.
 
 IMPORT FGL gl_lib
 IMPORT FGL gl_db
@@ -38,7 +38,7 @@ DEFINE m_sql_handle base.SqlHandle
 DEFINE m_dialog ui.Dialog
 DEFINE m_row_count, m_row_cur INTEGER
 DEFINE m_dbname STRING
-DEFINE m_allowedActions CHAR(6) --Y/N = Find / Update / Insert / Delete / Sample / List  -- eg: YNNNNN = enquiry only.
+DEFINE m_allowedActions CHAR(6)
 MAIN
 	CALL gl_lib.gl_setInfo(C_VER, C_APP_SPLASH, C_APP_ICON, NULL, C_PRGDESC, C_PRGAUTH)
 	CALL gl_lib.gl_init(ARG_VAL(1),"default",TRUE)
