@@ -64,12 +64,12 @@
     <Library binaryName="Databases" id="1986" label="Databases">
       <File filePath="etc/njm_demo310.4db"/>
     </Library>
-    <Application binaryName="dynMaint" commandLineArguments="S njm_demo310 stock stock_code" dependencies="14000,1986,1521940795" id="18736" label="dynMaint">
-      <File filePath="src/app_lib.4gl"/>
+    <Application binaryName="dm_customer" dependencies="1986,370724832,897794002,1422201568,14000,1521940795" id="569266721" label="dm_customer">
+      <File filePath="src/dm_customer.4gl"/>
       <File filePath="src/dm_njm_demo310_customer.per"/>
+    </Application>
+    <Application binaryName="dynMaint" commandLineArguments="S njm_demo310 stock stock_code" dependencies="14000,1986,1521940795,1422201568" id="18736" label="dynMaint">
       <File filePath="src/dynMaint.4gl"/>
-      <File filePath="src/dynMaint.inc"/>
-      <File filePath="src/mk_form.4gl"/>
     </Application>
     <Library binaryName="etc" id="897794002" label="etc">
       <File filePath="etc/default.4ad"/>
@@ -80,6 +80,15 @@
     <Library binaryName="gl_db" dependencies="1986" id="1521940795" label="gl_db">
       <File filePath="src/gl_lib/gl_db.4gl"/>
       <File filePath="src/gl_lib/gl_db.inc"/>
+    </Library>
+    <Library binaryName="gl_dynMaint" id="1422201568" label="gl_dynMaint">
+      <File filePath="src/dynMaint.inc"/>
+      <File filePath="src/glm_mkForm.4gl"/>
+      <File filePath="src/glm_setActions.4gl"/>
+    </Library>
+    <Library binaryName="gl_dynMaint2" dependencies="1422201568,14000" id="370724832" label="gl_dynMaint2">
+      <File filePath="src/glm_sql.4gl"/>
+      <File filePath="src/glm_ui.4gl"/>
     </Library>
     <Library binaryName="gl_lib" dependencies="1986" id="14000" label="gl_lib">
       <File filePath="src/gl_lib/genero_lib.inc"/>

@@ -12,8 +12,8 @@
 
 IMPORT FGL gl_lib
 IMPORT FGL gl_db
-IMPORT FGL app_lib
-IMPORT FGL mk_form
+IMPORT FGL glm_setActions
+IMPORT FGL glm_mkForm
 
 &include "genero_lib.inc"
 &include "dynMaint.inc"
@@ -23,11 +23,6 @@ CONSTANT C_PRGDESC = "Dynamic Maintenance Demo"
 CONSTANT C_PRGAUTH = "Neil J.Martin"
 CONSTANT C_APP_SPLASH = "njm_demo_logo_256"
 CONSTANT C_APP_ICON = "njm_demo_icon"
-
-CONSTANT SQL_FIRST = 0
-CONSTANT SQL_PREV = -1
-CONSTANT SQL_NEXT = -2
-CONSTANT SQL_LAST = -3
 
 DEFINE m_tab STRING
 DEFINE m_key_nam STRING
@@ -46,30 +41,31 @@ MAIN
 	LET gl_lib.gl_topMenu = "dynmaint"
 
 	CALL init_args()
+	CALL gl_db.gldb_connect( m_dbname )
 
 	LET m_key_fld = 0
 	LET m_row_cur = 0
 	LET m_row_count = 0
 	CALL mk_sql( "1=2" ) -- not fetching any data.
-	CALL mk_form.init_form(m_dbname, m_tab, 10, m_fields) -- 10 fields by folder page
+	CALL glm_mkForm.init_form(m_dbname, m_tab, 10, m_fields) -- 10 fields by folder page
 	CALL gl_lib.gl_titleWin(NULL)
 	CALL ui.Interface.setText( gl_lib.gl_progdesc )
 	MENU
 		BEFORE MENU
-			CALL app_lib.setActions(m_row_cur, m_row_count, m_allowedActions)
+			CALL glm_setActions.setActions(m_row_cur, m_row_count, m_allowedActions)
 		ON ACTION insert		CALL inpt(1)
 		ON ACTION update		IF m_row_cur > 0 THEN CALL inpt(0) END IF
 		ON ACTION delete		IF m_row_cur > 0 THEN CALL sql_del() END IF
 		ON ACTION find			CALL constrct()
-			CALL app_lib.setActions(m_row_cur,m_row_count, m_allowedActions)
+			CALL glm_setActions.setActions(m_row_cur,m_row_count, m_allowedActions)
 		ON ACTION firstrow	CALL get_row(SQL_FIRST)
-			CALL app_lib.setActions(m_row_cur,m_row_count, m_allowedActions)
+			CALL glm_setActions.setActions(m_row_cur,m_row_count, m_allowedActions)
 		ON ACTION prevrow		CALL get_row(SQL_PREV)
-			CALL app_lib.setActions(m_row_cur,m_row_count, m_allowedActions)
+			CALL glm_setActions.setActions(m_row_cur,m_row_count, m_allowedActions)
 		ON ACTION nextrow		CALL get_row(SQL_NEXT)
-			CALL app_lib.setActions(m_row_cur,m_row_count, m_allowedActions)
+			CALL glm_setActions.setActions(m_row_cur,m_row_count, m_allowedActions)
 		ON ACTION lastrow		CALL get_row(SQL_LAST)
-			CALL app_lib.setActions(m_row_cur,m_row_count, m_allowedActions)
+			CALL glm_setActions.setActions(m_row_cur,m_row_count, m_allowedActions)
 		ON ACTION quit			EXIT MENU
 		ON ACTION close			EXIT MENU
 		GL_ABOUT
@@ -82,9 +78,7 @@ FUNCTION init_args()
 	LET m_tab = ARG_VAL(3)
 	LET m_key_nam = ARG_VAL(4)
 	LET m_allowedActions = ARG_VAL(5)
-	IF m_dbname IS NOT NULL THEN
-		CALL gl_db.gldb_connect( m_dbname )
-	ELSE 
+	IF m_dbname IS NULL THEN
 		CALL gl_lib.gl_errPopup(SFMT(%"Invalid Database Name '%1'!",m_dbname))
 		CALL gl_lib.gl_exitProgram(1,%"invalid Database")
 	END IF
@@ -163,7 +157,7 @@ FUNCTION get_row(l_row INTEGER)
 			LET m_row_cur = l_row
 	END CASE
 	IF STATUS = 0 THEN
-		CALL mk_form.update_form_value( m_sql_handle )
+		CALL glm_mkForm.update_form_value( m_sql_handle )
 		MESSAGE SFMT(%"Rows %1 of %2",m_row_cur,m_row_count)
 	END IF
 END FUNCTION
@@ -213,7 +207,7 @@ FUNCTION inpt(l_new BOOLEAN)
 	ELSE
 		IF m_row_cur = 0 THEN RETURN END IF
 		FOR x = 1 TO m_fields.getLength()
-			CALL m_dialog.setFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname, m_sql_handle.getResultValue(x))
+			CALL m_dialog.setFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname, m_sql_handle.getResultValue(x))
 			IF x = m_key_fld THEN
 				CALL m_dialog.setFieldActive(m_fields[x].colname, FALSE )
 			END IF
@@ -258,17 +252,17 @@ FUNCTION sql_update()
 	LET l_sql = l_sql.append(") = (")
 	FOR x = 1 TO m_fields.getLength()
 		IF x != m_key_fld THEN
-			IF mk_form.m_fld_props[x].numeric THEN
-				LET l_val = NVL(m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname) ,"NULL")
+			IF glm_mkForm.m_fld_props[x].numeric THEN
+				LET l_val = NVL(m_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname) ,"NULL")
 			ELSE
-				LET l_val = NVL("'"||m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
+				LET l_val = NVL("'"||m_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
 			END IF
 			LET l_sql = l_sql.append( l_val )
 			IF x != m_fields.getLength() THEN
 				LET l_sql = l_sql.append(",")
 			END IF
 		ELSE
-			LET l_key = m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname)
+			LET l_key = m_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname)
 		END IF
 	END FOR
 	LET l_sql = l_sql.append(") where "||m_key_nam||" = ?")
@@ -297,7 +291,7 @@ FUNCTION sql_insert()
 	END FOR
 	LET l_sql = l_sql.append(") values(")
 	FOR x = 1 TO m_fields.getLength()
-		LET l_val = NVL("'"||m_dialog.getFieldValue(mk_form.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
+		LET l_val = NVL("'"||m_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
 		LET l_sql = l_sql.append( l_val )
 		IF x != m_fields.getLength() THEN
 			LET l_sql = l_sql.append(",")
