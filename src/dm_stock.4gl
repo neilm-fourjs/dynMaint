@@ -13,6 +13,8 @@ IMPORT FGL glm_ui
 &include "genero_lib.inc"
 &include "dynMaint.inc"
 
+SCHEMA njm_demo310
+
 CONSTANT C_VER="3.1"
 CONSTANT C_PRGDESC = "Dynamic Stock Maintenance Demo"
 CONSTANT C_PRGAUTH = "Neil J.Martin"
@@ -47,6 +49,7 @@ MAIN
 	CALL ui.Interface.setText( gl_lib.gl_progdesc )
 
 -- start UI
+	LET glm_ui.m_bi_func = FUNCTION my_before_inp
 	CALL glm_ui.glm_menu(m_allowedActions)
 
 	CALL gl_lib.gl_exitProgram(0,%"Program Finished")
@@ -55,4 +58,29 @@ END MAIN
 FUNCTION init_args()
 	LET m_allowedActions = NULL
 	IF m_allowedActions IS NULL THEN LET m_allowedActions = "YYYYYY" END IF
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION custom_form_init()
+	DEFINE f_init_cb t_init_cb
+	DISPLAY "In custom_form_init"
+	LET f_init_cb = FUNCTION init_cb
+	CALL glm_mkForm.setWidget("stock_cat","ComboBox", "init_cb", f_init_cb)
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION init_cb( l_cb ui.ComboBox )
+	DEFINE l_sc RECORD LIKE stock_cat.*
+	IF l_cb IS NULL THEN
+		DISPLAY "init_cb passed NULL!"
+		RETURN
+	END IF
+	DISPLAY "Loading stock_cat cb ..."
+	DECLARE cb_cur CURSOR FOR SELECT * FROM stock_cat
+	FOREACH cb_cur INTO l_sc.*
+		CALL l_cb.addItem( l_sc.catid CLIPPED, l_sc.cat_name CLIPPED )
+	END FOREACH
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION my_before_inp(l_new BOOLEAN)
+	DISPLAY "BEFORE INPUT : ",l_new
+
 END FUNCTION

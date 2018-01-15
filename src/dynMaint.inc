@@ -1,4 +1,7 @@
 
+TYPE t_init_cb FUNCTION( l_cb ui.ComboBox )
+TYPE t_bi_func FUNCTION( l_new BOOLEAN )
+
 TYPE t_fields RECORD
 		colname STRING,
 		type STRING
@@ -9,7 +12,10 @@ TYPE t_fld_props RECORD
 		label STRING,
 		len SMALLINT,
 		numeric BOOLEAN,
-		formFieldNode om.DomNode
+		formFieldNode om.DomNode,
+		widget STRING,
+		widget_props STRING,
+		widget_callback t_init_cb
 	END RECORD
 
 CONSTANT SQL_FIRST = 0

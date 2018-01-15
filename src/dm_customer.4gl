@@ -13,6 +13,8 @@ IMPORT FGL glm_ui
 &include "genero_lib.inc"
 &include "dynMaint.inc"
 
+SCHEMA njm_demo310
+
 CONSTANT C_VER="3.1"
 CONSTANT C_PRGDESC = "Dynamic Customer Maintenance Demo"
 CONSTANT C_PRGAUTH = "Neil J.Martin"
@@ -55,4 +57,24 @@ END MAIN
 FUNCTION init_args()
 	LET m_allowedActions = NULL
 	IF m_allowedActions IS NULL THEN LET m_allowedActions = "YYYYYY" END IF
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION custom_form_init()
+	DEFINE f_init_cb t_init_cb
+	DISPLAY "In custom_form_init"
+	LET f_init_cb = FUNCTION init_cb
+	CALL glm_mkForm.setWidget("disc_code","ComboBox", "init_cb", f_init_cb)
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION init_cb( l_cb ui.ComboBox )
+	DEFINE l_d RECORD LIKE disc.*
+	IF l_cb IS NULL THEN
+		DISPLAY "init_cb passed NULL!"
+		RETURN
+	END IF
+	DISPLAY "Loading disc_code cb ..."
+	DECLARE cb_cur CURSOR FOR SELECT UNIQUE customer_disc FROM disc
+	FOREACH cb_cur INTO l_d.customer_disc
+		CALL l_cb.addItem( l_d.customer_disc CLIPPED, l_d.customer_disc CLIPPED )
+	END FOREACH
 END FUNCTION

@@ -8,6 +8,7 @@ IMPORT FGL glm_mkForm
 &include "dynMaint.inc"
 
 DEFINE m_dialog ui.Dialog
+PUBLIC DEFINE m_bi_func t_bi_func
 --------------------------------------------------------------------------------
 FUNCTION glm_menu(l_allowedActions STRING)
 
@@ -95,6 +96,8 @@ FUNCTION glm_inpt(l_new BOOLEAN)
 	LET int_flag = FALSE
 	WHILE TRUE
 		CASE m_dialog.nextEvent()
+			WHEN "BEFORE INPUT"
+				IF m_bi_func IS NOT NULL THEN CALL m_bi_func(l_new) END IF
 			WHEN "ON ACTION close"
 				LET int_flag = TRUE
 				EXIT WHILE

@@ -75,3 +75,5 @@ FUNCTION init_args()
 	IF m_allowedActions IS NULL THEN LET m_allowedActions = "YYYYYY" END IF
 END FUNCTION
 --------------------------------------------------------------------------------
+FUNCTION custom_form_init()
+END FUNCTION
