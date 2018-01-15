@@ -1,5 +1,5 @@
 
--- A Basic dynamic customer maintenance program.
+-- A Basic dynamic stock maintenance program.
 -- Does: find, update, insert, delete
 -- To Do: locking, sample, listing report
 
@@ -14,7 +14,7 @@ IMPORT FGL glm_ui
 &include "dynMaint.inc"
 
 CONSTANT C_VER="3.1"
-CONSTANT C_PRGDESC = "Dynamic Customer Maintenance Demo"
+CONSTANT C_PRGDESC = "Dynamic Stock Maintenance Demo"
 CONSTANT C_PRGAUTH = "Neil J.Martin"
 CONSTANT C_APP_SPLASH = "njm_demo_logo_256"
 CONSTANT C_APP_ICON = "njm_demo_icon"
@@ -37,8 +37,8 @@ MAIN
 	LET glm_sql.m_key_fld = 0
 	LET glm_sql.m_row_cur = 0
 	LET glm_sql.m_row_count = 0
-	LET glm_sql.m_tab = "customer"
-	LET glm_sql.m_key_nam = "customer_code"
+	LET glm_sql.m_tab = "stock"
+	LET glm_sql.m_key_nam = "stock_code"
 	CALL glm_sql.glm_mkSQL("1=2") -- not fetching any data.
 
 -- create Form

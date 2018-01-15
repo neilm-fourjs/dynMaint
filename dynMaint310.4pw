@@ -68,7 +68,10 @@
       <File filePath="src/dm_customer.4gl"/>
       <File filePath="src/dm_njm_demo310_customer.per"/>
     </Application>
-    <Application binaryName="dynMaint" commandLineArguments="S njm_demo310 stock stock_code" dependencies="14000,1986,1521940795,1422201568" id="18736" label="dynMaint">
+    <Application binaryName="dm_stock" dependencies="1986,897794002,1422201568,14000,1521940795" id="-1038362992" label="dm_stock">
+      <File filePath="src/dm_stock.4gl"/>
+    </Application>
+    <Application binaryName="dynMaint" commandLineArguments="S njm_demo310 stock stock_code" dependencies="14000,1986,1521940795,1422201568,370724832" id="18736" label="dynMaint">
       <File filePath="src/dynMaint.4gl"/>
     </Application>
     <Library binaryName="etc" id="897794002" label="etc">
@@ -85,8 +88,6 @@
       <File filePath="src/dynMaint.inc"/>
       <File filePath="src/glm_mkForm.4gl"/>
       <File filePath="src/glm_setActions.4gl"/>
-    </Library>
-    <Library binaryName="gl_dynMaint2" dependencies="1422201568,14000" id="370724832" label="gl_dynMaint2">
       <File filePath="src/glm_sql.4gl"/>
       <File filePath="src/glm_ui.4gl"/>
     </Library>
