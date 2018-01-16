@@ -42,7 +42,7 @@ MAIN
 	LET glm_sql.m_key_fld = 0
 	LET glm_sql.m_row_cur = 0
 	LET glm_sql.m_row_count = 0
-	CALL glm_sql.glm_mkSQL("1=2") -- not fetching any data.
+	CALL glm_sql.glm_mkSQL("*","1=2") -- not fetching any data.
 
 -- create Form
 	CALL glm_mkForm.init_form(m_dbname, m_tab, 10, glm_sql.m_fields) -- 10 fields by folder page

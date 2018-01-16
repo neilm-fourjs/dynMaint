@@ -3,7 +3,7 @@ IMPORT FGL gl_lib
 IMPORT FGL glm_mkForm
 &include "dynMaint.inc"
 
-DEFINE m_where STRING
+PUBLIC DEFINE m_where, m_cols STRING
 PUBLIC DEFINE m_tab STRING
 PUBLIC DEFINE m_key_nam STRING
 PUBLIC DEFINE m_sql_handle base.SqlHandle
@@ -11,14 +11,14 @@ PUBLIC DEFINE m_fields DYNAMIC ARRAY OF t_fields
 PUBLIC DEFINE m_row_count, m_row_cur INTEGER
 PUBLIC DEFINE m_key_fld SMALLINT
 --------------------------------------------------------------------------------
-FUNCTION glm_mkSQL(l_where)
-	DEFINE l_where STRING
+FUNCTION glm_mkSQL(l_cols STRING, l_where STRING)
 	DEFINE l_sql STRING
 	DEFINE x SMALLINT
 	IF l_where.getLength() < 1 THEN LET l_where = "1=1" END IF
 	LET m_where = l_where
+	LET m_cols = l_cols
 
-	LET l_sql = "select * from "||m_tab||" where "||l_where
+	LET l_sql = "select "||l_cols||" from "||m_tab||" where "||l_where
 	LET m_sql_handle = base.SqlHandle.create()
 	TRY
 		CALL m_sql_handle.prepare( l_sql )
@@ -117,7 +117,7 @@ FUNCTION glm_SQLupdate(l_dialog ui.Dialog)
 	CATCH
 	END TRY
 	IF SQLCA.sqlcode = 0 THEN
-		CALL glm_mkSQL(m_where)
+		CALL glm_mkSQL(m_cols, m_where)
 		CALL glm_getRow(m_row_cur)
 	ELSE
 		CALL gl_lib.gl_errPopup(SFMT(%"Failed to update record!\n%1!",SQLERRMESSAGE))
@@ -149,7 +149,7 @@ FUNCTION glm_SQLinsert(l_dialog ui.Dialog)
 	CATCH
 	END TRY
 	IF SQLCA.sqlcode = 0 THEN
-		CALL glm_mkSQL(m_where)
+		CALL glm_mkSQL(m_cols, m_where)
 		CALL glm_getRow(SQL_LAST)
 	ELSE
 		CALL gl_lib.gl_errPopup(SFMT(%"Failed to insert record!\n%1!",SQLERRMESSAGE))

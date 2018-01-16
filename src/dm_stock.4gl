@@ -40,15 +40,16 @@ MAIN
 	LET glm_sql.m_row_count = 0
 	LET glm_sql.m_tab = "stock"
 	LET glm_sql.m_key_nam = "stock_code"
-	CALL glm_sql.glm_mkSQL("1=2") -- not fetching any data.
+	CALL glm_sql.glm_mkSQL("stock_code, stock_cat, supp_code, description","1=2") -- not fetching any data.
 
 -- create Form
-	CALL glm_mkForm.init_form(m_dbname, m_tab, 12, glm_sql.m_fields) -- 10 fields by folder page
+	CALL glm_mkForm.init_form(m_dbname, m_tab, 20, glm_sql.m_fields) -- 10 fields by folder page
 	CALL gl_lib.gl_titleWin( gl_lib.gl_progdesc )
 	CALL ui.Interface.setText( gl_lib.gl_progdesc )
 
 -- start UI
 	LET glm_ui.m_bi_func = FUNCTION my_before_inp
+--	LET glm_ui.m_inpt_func = FUNCTION my_input
 	CALL glm_ui.glm_menu(m_allowedActions)
 
 	CALL gl_lib.gl_exitProgram(0,%"Program Finished")
@@ -81,4 +82,8 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION my_before_inp(l_new BOOLEAN)
 	DISPLAY "BEFORE INPUT : ",l_new
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION my_input(l_new BOOLEAN)
+	DISPLAY "MY INPUT : ",l_new
 END FUNCTION

@@ -2,7 +2,6 @@
 IMPORT FGL gl_lib
 &include "genero_lib.inc"
 
-IMPORT FGL glm_setActions
 IMPORT FGL glm_sql
 IMPORT FGL glm_mkForm
 &include "dynMaint.inc"
@@ -15,20 +14,20 @@ FUNCTION glm_menu(l_allowedActions STRING )
 	IF m_inpt_func IS NULL THEN LET m_inpt_func = FUNCTION glm_inpt END IF
 	MENU
 		BEFORE MENU
-			CALL glm_setActions.setActions(glm_sql.m_row_cur, glm_sql.m_row_count, l_allowedActions)
+			CALL setActions(glm_sql.m_row_cur, glm_sql.m_row_count, l_allowedActions)
 		ON ACTION insert		CALL m_inpt_func(TRUE)
 		ON ACTION update		CALL m_inpt_func(FALSE)
 		ON ACTION delete		CALL glm_sql.glm_SQLdelete()
 		ON ACTION find			CALL glm_constrct()
-			CALL glm_setActions.setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
+			CALL setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
 		ON ACTION firstrow	CALL glm_sql.glm_getRow(SQL_FIRST)
-			CALL glm_setActions.setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
+			CALL setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
 		ON ACTION prevrow		CALL glm_sql.glm_getRow(SQL_PREV)
-			CALL glm_setActions.setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
+			CALL setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
 		ON ACTION nextrow		CALL glm_sql.glm_getRow(SQL_NEXT)
-			CALL glm_setActions.setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
+			CALL setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
 		ON ACTION lastrow		CALL glm_sql.glm_getRow(SQL_LAST)
-			CALL glm_setActions.setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
+			CALL setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
 		ON ACTION quit			EXIT MENU
 		ON ACTION close			EXIT MENU
 		GL_ABOUT
@@ -69,7 +68,7 @@ FUNCTION glm_constrct()
 		END IF
 	END FOR
 
-	CALL glm_sql.glm_mkSQL( l_sql )
+	CALL glm_sql.glm_mkSQL( glm_sql.m_cols, l_sql )
 	CALL glm_sql.glm_getRow(SQL_FIRST)
 
 END FUNCTION
