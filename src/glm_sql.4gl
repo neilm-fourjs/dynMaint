@@ -1,6 +1,6 @@
-IMPORT FGL glm_mkForm
-IMPORT FGL gl_lib
 
+IMPORT FGL gl_lib
+IMPORT FGL glm_mkForm
 &include "dynMaint.inc"
 
 DEFINE m_where STRING

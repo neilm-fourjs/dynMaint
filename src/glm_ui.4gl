@@ -8,16 +8,17 @@ IMPORT FGL glm_mkForm
 &include "dynMaint.inc"
 
 DEFINE m_dialog ui.Dialog
-PUBLIC DEFINE m_bi_func t_bi_func
+PUBLIC DEFINE m_bi_func t_bi_func -- before input callback function
+PUBLIC DEFINE m_inpt_func t_inpt_func -- input function
 --------------------------------------------------------------------------------
-FUNCTION glm_menu(l_allowedActions STRING)
-
+FUNCTION glm_menu(l_allowedActions STRING )
+	IF m_inpt_func IS NULL THEN LET m_inpt_func = FUNCTION glm_inpt END IF
 	MENU
 		BEFORE MENU
 			CALL glm_setActions.setActions(glm_sql.m_row_cur, glm_sql.m_row_count, l_allowedActions)
-		ON ACTION insert		CALL glm_inpt(1)
-		ON ACTION update		IF glm_sql.m_row_cur > 0 THEN CALL glm_inpt(0) END IF
-		ON ACTION delete		IF glm_sql.m_row_cur > 0 THEN CALL glm_sql.glm_SQLdelete() END IF
+		ON ACTION insert		CALL m_inpt_func(TRUE)
+		ON ACTION update		CALL m_inpt_func(FALSE)
+		ON ACTION delete		CALL glm_sql.glm_SQLdelete()
 		ON ACTION find			CALL glm_constrct()
 			CALL glm_setActions.setActions(glm_sql.m_row_cur,glm_sql.m_row_count, l_allowedActions)
 		ON ACTION firstrow	CALL glm_sql.glm_getRow(SQL_FIRST)
@@ -113,5 +114,38 @@ FUNCTION glm_inpt(l_new BOOLEAN)
 				EXIT WHILE
 		END CASE
 	END WHILE
+END FUNCTION
+--------------------------------------------------------------------------------
+-- Setup actions based on a allowed actions
+PRIVATE FUNCTION setActions(l_row INT, l_max INT,l_allowedActions CHAR(6))
+	DEFINE d ui.Dialog
+&define ACT_FIND l_allowedActions[1]
+&define ACT_UPD l_allowedActions[2]
+&define ACT_INS l_allowedActions[3]
+&define ACT_DEL l_allowedActions[4]
+&define ACT_SAM l_allowedActions[5]
+&define ACT_LIST l_allowedActions[6]
+	LET d = ui.Dialog.getCurrent()
+	CALL d.setActionActive("update",FALSE)
+	CALL d.setActionActive("delete",FALSE)
+	CALL d.setActionActive("lastrow",FALSE)
+	CALL d.setActionActive("nextrow",FALSE)
+	CALL d.setActionActive("prevrow",FALSE)
+	CALL d.setActionActive("firstrow",FALSE)
+	IF ACT_FIND = "N" THEN CALL d.setActionActive("find",FALSE) END IF
+--	IF ACT_LIST = "N" THEN CALL d.setActionActive("list",FALSE) END IF
+	IF ACT_INS = "N" THEN CALL d.setActionActive("insert",FALSE) END IF
+	IF l_row > 0 THEN
+		IF ACT_UPD = "Y" THEN CALL d.setActionActive("update",TRUE) END IF
+		IF ACT_DEL = "Y" THEN CALL d.setActionActive("delete",TRUE) END IF
+	END IF
+	IF l_row > 0 AND l_row < l_max THEN
+		CALL d.setActionActive("nextrow",TRUE)
+		CALL d.setActionActive("lastrow",TRUE)
+	END IF
+	IF l_row > 1 THEN
+		CALL d.setActionActive("prevrow",TRUE)
+		CALL d.setActionActive("firstrow",TRUE)
+	END IF 
 END FUNCTION
 --------------------------------------------------------------------------------

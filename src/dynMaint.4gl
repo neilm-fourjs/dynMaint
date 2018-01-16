@@ -12,12 +12,11 @@
 
 IMPORT FGL gl_lib
 IMPORT FGL gl_db
-IMPORT FGL glm_setActions
+&include "genero_lib.inc"
+
 IMPORT FGL glm_mkForm
 IMPORT FGL glm_sql
 IMPORT FGL glm_ui
-
-&include "genero_lib.inc"
 &include "dynMaint.inc"
 
 CONSTANT C_VER="3.1"
@@ -36,7 +35,7 @@ MAIN
 
 	CALL init_args()
 
--- setup DB
+-- setup and connect to DB
 	CALL gl_db.gldb_connect( m_dbname )
 
 -- setup SQL
@@ -52,6 +51,7 @@ MAIN
 
 -- start UI
 	CALL glm_ui.glm_menu(m_allowedActions)
+
 	CALL gl_lib.gl_exitProgram(0,%"Program Finished")
 END MAIN
 --------------------------------------------------------------------------------

@@ -1,17 +1,18 @@
 
 &include "dynMaint.inc"
 
+PUBLIC DEFINE m_fld_props DYNAMIC ARRAY OF t_fld_props
+PUBLIC DEFINE m_formName STRING
+PUBLIC DEFINE m_w ui.Window
+PUBLIC DEFINE m_f ui.Form
+
+--------------------------------------------------------------------------------
 # Build a form based on an array of field names and an array of properties.
 #+ @param l_db Database name
 #+ @param l_tab Table name
 #+ @param l_fld_per_page Fields per page ( folder tabs )
 #+ @param l_fields Array of field names / types
 #+ @param l_fld_props Array of field properties.
-PUBLIC DEFINE m_fld_props DYNAMIC ARRAY OF t_fld_props
-PUBLIC DEFINE m_formName STRING
-PUBLIC DEFINE m_w ui.Window
-PUBLIC DEFINE m_f ui.Form
---------------------------------------------------------------------------------
 FUNCTION init_form(
 	l_db STRING,
 	l_tab STRING, 
@@ -45,7 +46,7 @@ FUNCTION init_form(
 	CALL ui.Interface.getRootNode().writeXml("aui_"||l_tab||"_static.xml")
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION mk_form(l_tab STRING,	l_fld_per_page SMALLINT, 	l_fields DYNAMIC ARRAY OF t_fields)
+PRIVATE FUNCTION mk_form(l_tab STRING,	l_fld_per_page SMALLINT, 	l_fields DYNAMIC ARRAY OF t_fields)
 	DEFINE l_n_form, l_n_grid,l_n_formfield, l_n_widget, l_folder, l_container om.DomNode
 	DEFINE x, y, l_first_fld, l_last_fld, l_maxlablen SMALLINT
 	DEFINE l_pages DECIMAL(3,1)
@@ -129,9 +130,11 @@ FUNCTION mk_form(l_tab STRING,	l_fld_per_page SMALLINT, 	l_fields DYNAMIC ARRAY 
 	END FOR
 	DISPLAY "Form Created."
 
+-- for debug only
 	CALL ui.Interface.refresh()
 	CALL ui.Interface.getRootNode().writeXml("aui_"||l_tab||"_dynamic.xml")
 
+-- attempt to handle any comboboxes
 	FOR x = 1 TO m_fld_props.getLength()
 		IF m_fld_props[x].widget = "ComboBox" THEN
 			DISPLAY "Looking for cb of: ", m_fld_props[x].tabname||"."||m_fld_props[x].colname 

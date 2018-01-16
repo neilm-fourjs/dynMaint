@@ -5,12 +5,11 @@
 
 IMPORT FGL gl_lib
 IMPORT FGL gl_db
-IMPORT FGL glm_setActions
+&include "genero_lib.inc"
+
 IMPORT FGL glm_mkForm
 IMPORT FGL glm_sql
 IMPORT FGL glm_ui
-
-&include "genero_lib.inc"
 &include "dynMaint.inc"
 
 SCHEMA njm_demo310
@@ -82,5 +81,4 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION my_before_inp(l_new BOOLEAN)
 	DISPLAY "BEFORE INPUT : ",l_new
-
 END FUNCTION

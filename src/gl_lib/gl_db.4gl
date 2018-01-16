@@ -82,11 +82,12 @@ FUNCTION gldb_connect( l_db STRING )
 
 	TRY
 		DISPLAY "Connecting to "||m_dbnam||" Using:",m_dbdrv, " Source:",m_dbsrc," ..."
+		DISPLAY "DATABASE ",m_dbcon
 		DATABASE m_dbcon
 		DISPLAY "Connected to "||m_dbnam||" Using:",m_dbdrv, " Source:",m_dbsrc
 	CATCH
 		LET l_msg = "Connection to database failed\nDB:",m_dbnam,"\nSource:",m_dbsrc, "\nDriver:",m_dbdrv,"\n",
-			 "Status:",SQLCA.SQLCODE,"\n",SQLERRMESSAGE
+			 "Status:",SQLCA.SQLCODE,"\n",SQLERRMESSAGE,"\nFGLPROFILE:",fgl_getEnv("FGLPROFILE")
 		DISPLAY l_msg
 		IF m_cre_db AND m_dbtyp = "ifx" AND SQLCA.SQLCODE = -329 THEN
 			CALL gldb_ifx_createdb()

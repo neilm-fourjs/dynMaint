@@ -3,14 +3,14 @@
 -- Does: find, update, insert, delete
 -- To Do: locking, sample, listing report
 
+
 IMPORT FGL gl_lib
 IMPORT FGL gl_db
-IMPORT FGL glm_setActions
+&include "genero_lib.inc"
+
 IMPORT FGL glm_mkForm
 IMPORT FGL glm_sql
 IMPORT FGL glm_ui
-
-&include "genero_lib.inc"
 &include "dynMaint.inc"
 
 SCHEMA njm_demo310

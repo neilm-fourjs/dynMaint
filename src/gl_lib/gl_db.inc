@@ -5,7 +5,7 @@
 CONSTANT DEF_DBNAME="njm_demo310"
 
 # Informix
-CONSTANT DEF_DBDRIVER="dbmifx9x"
+CONSTANT DEF_DBDRIVER="dbmifx"
 CONSTANT DEF_DBSPACE="dbs1"
 
 # SQLServer

@@ -1,5 +1,6 @@
 
 TYPE t_init_cb FUNCTION( l_cb ui.ComboBox )
+TYPE t_inpt_func FUNCTION( l_new BOOLEAN )
 TYPE t_bi_func FUNCTION( l_new BOOLEAN )
 
 TYPE t_fields RECORD
