@@ -50,10 +50,10 @@ FUNCTION glm_mkSQL(l_cols STRING, l_where STRING)
 		LET m_row_count = 0
 		LET m_row_cur = 0
 	END IF
-	MESSAGE "Rows "||m_row_cur||" of "||m_row_count
+--	MESSAGE "Rows "||m_row_cur||" of "||m_row_count
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION glm_getRow(l_row INTEGER)
+FUNCTION glm_getRow(l_row INTEGER, l_msg BOOLEAN)
 	IF l_row > m_row_count THEN LET l_row = m_row_count END IF
 	CASE l_row
 		WHEN SQL_FIRST
@@ -78,7 +78,7 @@ FUNCTION glm_getRow(l_row INTEGER)
 	END CASE
 	IF STATUS = 0 THEN
 		CALL glm_mkForm.update_form_value( m_sql_handle )
-		MESSAGE SFMT(%"Rows %1 of %2",m_row_cur,m_row_count)
+		IF l_msg THEN	MESSAGE SFMT(%"Rows %1 of %2",m_row_cur,m_row_count) END IF
 	END IF
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -114,11 +114,13 @@ FUNCTION glm_SQLupdate(l_dialog ui.Dialog)
 	TRY
 		PREPARE upd_stmt FROM l_sql
 		EXECUTE upd_stmt USING l_key
+		MESSAGE "Record Updated."
 	CATCH
+		ERROR "Update Failed!"
 	END TRY
-	IF SQLCA.sqlcode = 0 THEN
+	IF SQLCA.sqlcode = 0 THEN -- refresh the cursor so it shows the updated row.
 		CALL glm_mkSQL(m_cols, m_where)
-		CALL glm_getRow(m_row_cur)
+		CALL glm_getRow(m_row_cur, FALSE)
 	ELSE
 		CALL gl_lib.gl_errPopup(SFMT(%"Failed to update record!\n%1!",SQLERRMESSAGE))
 	END IF
@@ -146,11 +148,13 @@ FUNCTION glm_SQLinsert(l_dialog ui.Dialog)
 	TRY
 		PREPARE ins_stmt FROM l_sql
 		EXECUTE ins_stmt
+		MESSAGE "Record Inserted."
 	CATCH
+		ERROR "Insert Failed!"
 	END TRY
 	IF SQLCA.sqlcode = 0 THEN
 		CALL glm_mkSQL(m_cols, m_where)
-		CALL glm_getRow(SQL_LAST)
+		CALL glm_getRow(SQL_LAST, FALSE)
 	ELSE
 		CALL gl_lib.gl_errPopup(SFMT(%"Failed to insert record!\n%1!",SQLERRMESSAGE))
 	END IF
@@ -170,7 +174,7 @@ FUNCTION glm_SQLdelete()
 		END TRY
 		IF SQLCA.sqlcode = 0 THEN
 			LET m_row_count = m_row_count - 1
-			CALL glm_getRow(m_row_cur)
+			CALL glm_getRow(m_row_cur, FALSE)
 		ELSE
 			CALL gl_lib.gl_errPopup(SFMT(%"Failed to delete record!\n%1!",SQLERRMESSAGE))
 		END IF

@@ -3,6 +3,7 @@
 -- Does: find, update, insert, delete
 -- To Do: locking, sample, listing report
 
+IMPORT util
 IMPORT FGL gl_lib
 IMPORT FGL gl_db
 &include "genero_lib.inc"
@@ -49,8 +50,9 @@ MAIN
 	CALL ui.Interface.setText( gl_lib.gl_progdesc )
 
 -- start UI
-	LET glm_ui.m_bi_func = FUNCTION my_before_inp
+	LET glm_ui.m_before_inp_func = FUNCTION my_before_inp
 --	LET glm_ui.m_inpt_func = FUNCTION my_input
+	LET glm_ui.m_after_inp_func = FUNCTION my_after_inp
 	CALL glm_ui.glm_menu(m_allowedActions)
 
 	CALL gl_lib.gl_exitProgram(0,%"Program Finished")
@@ -101,8 +103,20 @@ FUNCTION init_cb( l_cb ui.ComboBox )
 	END IF
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION my_before_inp(l_new BOOLEAN)
+FUNCTION my_before_inp(l_new BOOLEAN, l_d ui.Dialog)
 	DISPLAY "BEFORE INPUT : ",l_new
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION my_after_inp(l_new BOOLEAN, l_d ui.Dialog) RETURNS BOOLEAN
+	DEFINE  l_stk RECORD LIKE stock.*
+	DISPLAY "AFTER INPUT : ",l_new
+	CALL util.JSON.parse( glm_mkForm.m_json_rec.toString(), l_stk)
+	IF l_stk.price < 0.10 THEN
+		ERROR "Stock price can't be less than 0.10!"
+		CALL l_d.nextField("price")
+		RETURN FALSE
+	END IF
+	RETURN TRUE
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION my_input(l_new BOOLEAN)

@@ -1,10 +1,13 @@
 
+IMPORT util
+
 &include "dynMaint.inc"
 
 PUBLIC DEFINE m_fld_props DYNAMIC ARRAY OF t_fld_props
 PUBLIC DEFINE m_formName STRING
 PUBLIC DEFINE m_w ui.Window
 PUBLIC DEFINE m_f ui.Form
+PUBLIC DEFINE m_json_rec util.JSONObject
 DEFINE m_tab STRING
 DEFINE m_key_fld SMALLINT
 DEFINE m_fld_per_page SMALLINT
@@ -31,11 +34,14 @@ FUNCTION init_form(
 	LET m_key_fld = l_key_fld
 	LET m_fld_per_page = l_fld_per_page
 	LET m_fields = l_fields
-	LET m_w = ui.Window.getCurrent()
 	LET m_formName = "dm_"||l_db.trim().toLowerCase()||"_"||l_tab.trim().toLowerCase()
+	MESSAGE "looking for ",m_formName," ..."
+	LET m_w = ui.Window.getCurrent()
 	TRY
 		OPEN FORM dynMaint FROM m_formName
+		MESSAGE "Using:",m_formName
 	CATCH
+		MESSAGE "Using a Dynamic Form."
 		CALL mk_form()
 		RETURN
 	END TRY
@@ -229,12 +235,15 @@ END FUNCTION
 -- set the screen field nodes value to the values from the db
 FUNCTION update_form_value(l_sql_handle base.SqlHandle)
 	DEFINE x SMALLINT
+	LET m_json_rec = util.JSONObject.create()
 	FOR x = 1 TO m_fld_props.getLength()
 		IF  m_fld_props[x].formFieldNode IS NOT NULL THEN
 			LET m_fld_props[x].value = l_sql_handle.getResultValue(x)
 			CALL m_fld_props[x].formFieldNode.setAttribute("value", m_fld_props[x].value.trim())
 		END IF
+		CALL m_json_rec.put(m_fld_props[x].colname, m_fld_props[x].value)
 	END FOR
+	DISPLAY m_json_rec.toString()
 	CALL ui.Interface.refresh()
 END FUNCTION
 --------------------------------------------------------------------------------
