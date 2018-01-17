@@ -8,10 +8,12 @@ TYPE t_fields RECORD
 		type STRING
 	END RECORD
 TYPE t_fld_props RECORD
+		name STRING,
 		tabname STRING,
 		colname STRING,
 		label STRING,
 		len SMALLINT,
+		iskey BOOLEAN,
 		numeric BOOLEAN,
 		formFieldNode om.DomNode,
 		widget STRING,

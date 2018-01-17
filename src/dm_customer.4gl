@@ -44,7 +44,7 @@ MAIN
 	CALL glm_sql.glm_mkSQL("*","1=2") -- not fetching any data.
 
 -- create Form
-	CALL glm_mkForm.init_form(m_dbname, m_tab, 12, glm_sql.m_fields) -- 10 fields by folder page
+	CALL glm_mkForm.init_form(m_dbname, m_tab, glm_sql.m_key_fld, 12, glm_sql.m_fields) -- 10 fields by folder page
 	CALL gl_lib.gl_titleWin( gl_lib.gl_progdesc )
 	CALL ui.Interface.setText( gl_lib.gl_progdesc )
 

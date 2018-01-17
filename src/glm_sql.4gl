@@ -98,16 +98,16 @@ FUNCTION glm_SQLupdate(l_dialog ui.Dialog)
 	FOR x = 1 TO m_fields.getLength()
 		IF x != m_key_fld THEN
 			IF glm_mkForm.m_fld_props[x].numeric THEN
-				LET l_val = NVL(l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname) ,"NULL")
+				LET l_val = NVL(l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].name) ,"NULL")
 			ELSE
-				LET l_val = NVL("'"||l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
+				LET l_val = NVL("'"||l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].name)||"'" ,"NULL")
 			END IF
 			LET l_sql = l_sql.append( l_val )
 			IF x != m_fields.getLength() THEN
 				LET l_sql = l_sql.append(",")
 			END IF
 		ELSE
-			LET l_key = l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname)
+			LET l_key = l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].name)
 		END IF
 	END FOR
 	LET l_sql = l_sql.append(") where "||m_key_nam||" = ?")
@@ -136,7 +136,7 @@ FUNCTION glm_SQLinsert(l_dialog ui.Dialog)
 	END FOR
 	LET l_sql = l_sql.append(") values(")
 	FOR x = 1 TO m_fields.getLength()
-		LET l_val = NVL("'"||l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].tabname||"."||m_fields[x].colname)||"'" ,"NULL")
+		LET l_val = NVL("'"||l_dialog.getFieldValue(glm_mkForm.m_fld_props[x].name)||"'" ,"NULL")
 		LET l_sql = l_sql.append( l_val )
 		IF x != m_fields.getLength() THEN
 			LET l_sql = l_sql.append(",")

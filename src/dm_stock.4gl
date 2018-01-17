@@ -40,10 +40,10 @@ MAIN
 	LET glm_sql.m_row_count = 0
 	LET glm_sql.m_tab = "stock"
 	LET glm_sql.m_key_nam = "stock_code"
-	CALL glm_sql.glm_mkSQL("stock_code, stock_cat, supp_code, description","1=2") -- not fetching any data.
+	CALL glm_sql.glm_mkSQL("stock_code, stock_cat, supp_code, description, price","1=2") -- not fetching any data.
 
 -- create Form
-	CALL glm_mkForm.init_form(m_dbname, m_tab, 20, glm_sql.m_fields) -- 10 fields by folder page
+	CALL glm_mkForm.init_form(m_dbname, m_tab, glm_sql.m_key_fld, 20, glm_sql.m_fields) -- 10 fields by folder page
 	CALL gl_lib.gl_titleWin( gl_lib.gl_progdesc )
 	CALL ui.Interface.setText( gl_lib.gl_progdesc )
 
@@ -65,19 +65,31 @@ FUNCTION custom_form_init()
 	DISPLAY "In custom_form_init"
 	LET f_init_cb = FUNCTION init_cb
 	CALL glm_mkForm.setWidget("stock_cat","ComboBox", "init_cb", f_init_cb)
+	CALL glm_mkForm.setWidget("supp_code","ComboBox", "init_cb", f_init_cb)
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION init_cb( l_cb ui.ComboBox )
-	DEFINE l_sc RECORD LIKE stock_cat.*
+	DEFINE l_sql, l_key, l_desc STRING
 	IF l_cb IS NULL THEN
 		DISPLAY "init_cb passed NULL!"
 		RETURN
 	END IF
-	DISPLAY "Loading stock_cat cb ..."
-	DECLARE cb_cur CURSOR FOR SELECT * FROM stock_cat
-	FOREACH cb_cur INTO l_sc.*
-		CALL l_cb.addItem( l_sc.catid CLIPPED, l_sc.cat_name CLIPPED )
-	END FOREACH
+	CASE l_cb.getColumnName()
+		WHEN "stock_cat"
+			LET l_sql = "SELECT catid, cat_name FROM stock_cat ORDER BY cat_name"
+		WHEN "supp_code"
+			LET l_sql = "SELECT supp_code, supp_name FROM supplier ORDER BY supp_name"
+	END CASE
+	IF l_sql IS NOT NULL THEN
+		DISPLAY "Loading ComboBox for: ",l_cb.getColumnName()
+		DECLARE cb_cur CURSOR FROM l_sql
+		FOREACH cb_cur INTO l_key, l_desc
+			IF l_key.trim().getLength() > 1 THEN
+				--DISPLAY "Key:",l_key.trim()," Desc:",l_desc.trim()
+				CALL l_cb.addItem( l_key, l_desc.trim() )
+			END IF
+		END FOREACH
+	END IF
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION my_before_inp(l_new BOOLEAN)
