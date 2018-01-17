@@ -22,6 +22,7 @@ TYPE t_fld_props RECORD
 		widget STRING,
 		widget_prop1 STRING,
 		widget_prop2 STRING,
+		widget_prop3 STRING,
 		widget_callback t_init_cb
 	END RECORD
 

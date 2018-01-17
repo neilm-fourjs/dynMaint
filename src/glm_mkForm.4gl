@@ -57,7 +57,7 @@ END FUNCTION
 --------------------------------------------------------------------------------
 PRIVATE FUNCTION mk_form()
 	DEFINE l_n_form, l_n_grid,l_n_formfield, l_n_widget, l_folder, l_container om.DomNode
-	DEFINE x, y, l_first_fld, l_last_fld, l_maxlablen SMALLINT
+	DEFINE x, y, l_posy, l_first_fld, l_last_fld, l_maxlablen SMALLINT
 	DEFINE l_pages DECIMAL(3,1)
 	DEFINE l_widget STRING
 
@@ -93,12 +93,12 @@ PRIVATE FUNCTION mk_form()
 
 		LET l_n_grid = l_container.createChild("Grid")
 		CALL m_w.setText(SFMT(%"Dynamic Maintenance for %1",m_tab))
-
-		FOR x = l_first_fld TO l_last_fld
+		LET l_posY = 1
+		FOR x = l_first_fld TO l_last_fld 
 -- Label
 			LET l_n_formfield = l_n_grid.createChild("Label")
 			CALL l_n_formfield.setAttribute("text", m_fld_props[x].label )
-			CALL l_n_formfield.setAttribute("posY", x )
+			CALL l_n_formfield.setAttribute("posY", l_posY )
 			CALL l_n_formfield.setAttribute("posX", "1" )
 			CALL l_n_formfield.setAttribute("gridWidth", m_fld_props[x].label.getLength() )
 			CALL l_n_formfield.setAttribute("hidden", m_fld_props[x].hidden)
@@ -127,19 +127,29 @@ PRIVATE FUNCTION mk_form()
 				LET l_widget = m_fld_props[x].widget
 			END IF
 			LET l_n_widget = l_n_formField.createChild(l_widget)
+			CALL l_n_widget.setAttribute("posY", l_posY )
+			CALL l_n_widget.setAttribute("posX", l_maxlablen+1 )
 			CALL l_n_widget.setAttribute("width", m_fld_props[x].len)
 			IF m_fld_props[x].widget = "CheckBox" THEN
 				CALL l_n_widget.setAttribute("valueChecked", m_fld_props[x].widget_prop1)
 				CALL l_n_widget.setAttribute("valueUnchecked", m_fld_props[x].widget_prop2)
 			END IF
-			CALL l_n_widget.setAttribute("posY", x )
-			CALL l_n_widget.setAttribute("posX", l_maxlablen+1 )
-			CALL l_n_widget.setAttribute("gridWidth", m_fld_props[x].len )
+			IF m_fld_props[x].widget = "TextEdit" THEN
+				CALL l_n_widget.setAttribute("gridHeight", m_fld_props[x].widget_prop1)
+				CALL l_n_widget.setAttribute("height", m_fld_props[x].widget_prop1)
+				CALL l_n_widget.setAttribute("gridWidth", m_fld_props[x].widget_prop2)
+				CALL l_n_widget.setAttribute("width", m_fld_props[x].widget_prop2)
+				CALL l_n_widget.setAttribute("scroll", m_fld_props[x].widget_prop3)
+				LET l_posY = l_posY + m_fld_props[x].widget_prop1
+			ELSE
+				CALL l_n_widget.setAttribute("gridWidth", m_fld_props[x].len )
+			END IF
 			CALL l_n_widget.setAttribute("comment", "Type:"||m_fields[x].type )
 			IF m_fld_props[x].numeric THEN
 				CALL l_n_widget.setAttribute("justify", "right")
 			END IF
 			CALL l_n_widget.setAttribute("hidden", m_fld_props[x].hidden)
+			LET l_posY = l_posY + 1
 		END FOR
 		LET l_first_fld = l_first_fld + m_fld_per_page
 	END FOR
@@ -191,24 +201,25 @@ FUNCTION hideField(l_fldName STRING)
 END FUNCTION
 --------------------------------------------------------------------------------
 -- set a specific field to a specific widget
-FUNCTION setWidgetProps(l_fldName STRING, l_widget STRING, l_prop1 STRING, l_prop2 STRING)
+FUNCTION setWidgetProps(l_fldName STRING, l_widget STRING, l_prop1 STRING, l_prop2 STRING, l_prop3 STRING)
 	DEFINE x SMALLINT
 	FOR x = 1 TO m_fld_props.getLength()
 		IF m_fld_props[x].colname = l_fldName THEN
 			LET m_fld_props[x].widget = l_widget
 			LET m_fld_props[x].widget_prop1 = l_prop1
 			LET m_fld_props[x].widget_prop2 = l_prop2
+			LET m_fld_props[x].widget_prop3 = l_prop3
 			RETURN
 		END IF
 	END FOR
 END FUNCTION
 --------------------------------------------------------------------------------
--- set a specific field to a specific widget
-FUNCTION setComboInitializer(l_fldName STRING, l_widget STRING, f_init_cb t_init_cb)
+-- set a field to a combobox
+FUNCTION setComboBox(l_fldName STRING, f_init_cb t_init_cb)
 	DEFINE x SMALLINT
 	FOR x = 1 TO m_fld_props.getLength()
 		IF m_fld_props[x].colname = l_fldName THEN
-			LET m_fld_props[x].widget = l_widget
+			LET m_fld_props[x].widget = "ComboBox"
 			LET m_fld_props[x].widget_callback = f_init_cb
 			RETURN
 		END IF

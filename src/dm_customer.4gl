@@ -63,7 +63,7 @@ FUNCTION custom_form_init()
 	DEFINE f_init_cb t_init_cb
 	DISPLAY "In custom_form_init"
 	LET f_init_cb = FUNCTION init_cb
-	CALL glm_mkForm.setComboInitializer("disc_code","ComboBox", f_init_cb)
+	CALL glm_mkForm.setComboBox("disc_code", f_init_cb)
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION init_cb( l_cb ui.ComboBox )

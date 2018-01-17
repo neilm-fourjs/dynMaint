@@ -64,9 +64,11 @@ END FUNCTION
 FUNCTION custom_form_init()
 	DEFINE f_init_cb t_init_cb
 	LET f_init_cb = FUNCTION init_cb
-	CALL glm_mkForm.setComboInitializer("stock_cat","ComboBox", f_init_cb)
-	CALL glm_mkForm.setComboInitializer("supp_code","ComboBox", f_init_cb)
-	CALL glm_mkForm.setWidgetProps("pack_flag","CheckBox","P","")
+	CALL glm_mkForm.setComboBox("stock_cat", f_init_cb)
+	CALL glm_mkForm.setComboBox("supp_code", f_init_cb)
+	CALL glm_mkForm.setComboBox("disc_code", f_init_cb)
+	CALL glm_mkForm.setWidgetProps("pack_flag","CheckBox","P","","")
+	CALL glm_mkForm.setWidgetProps("long_desc","TextEdit","2","40","both")
 	CALL glm_mkForm.hideField("cost")
 	CALL glm_mkForm.noEntryField("free_stock")
 	CALL glm_mkForm.noEntryField("physical_stock")
@@ -84,6 +86,8 @@ FUNCTION init_cb( l_cb ui.ComboBox )
 			LET l_sql = "SELECT catid, cat_name FROM stock_cat ORDER BY cat_name"
 		WHEN "supp_code"
 			LET l_sql = "SELECT supp_code, supp_name FROM supplier ORDER BY supp_name"
+		WHEN "disc_code"
+			LET l_sql = "SELECT UNIQUE stock_disc FROM disc ORDER BY stock_disc"
 	END CASE
 	IF l_sql IS NOT NULL THEN
 		DISPLAY "Loading ComboBox for: ",l_cb.getColumnName()
