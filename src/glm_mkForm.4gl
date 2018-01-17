@@ -95,12 +95,14 @@ PRIVATE FUNCTION mk_form()
 		CALL m_w.setText(SFMT(%"Dynamic Maintenance for %1",m_tab))
 
 		FOR x = l_first_fld TO l_last_fld
+-- Label
 			LET l_n_formfield = l_n_grid.createChild("Label")
 			CALL l_n_formfield.setAttribute("text", m_fld_props[x].label )
 			CALL l_n_formfield.setAttribute("posY", x )
 			CALL l_n_formfield.setAttribute("posX", "1" )
 			CALL l_n_formfield.setAttribute("gridWidth", m_fld_props[x].label.getLength() )
-
+			CALL l_n_formfield.setAttribute("hidden", m_fld_props[x].hidden)
+-- FormField
 			LET l_n_formfield = l_n_grid.createChild("FormField")
 			LET m_fld_props[x].formFieldNode = l_n_formfield
 			CALL l_n_formfield.setAttribute("name", m_fld_props[x].name )
@@ -114,6 +116,8 @@ PRIVATE FUNCTION mk_form()
 				CALL l_n_formfield.setAttribute("notNull", TRUE )
 				CALL l_n_formfield.setAttribute("required", TRUE )
 			END IF
+			CALL l_n_formfield.setAttribute("noEntry", m_fld_props[x].noentry)
+-- Widget
 			IF m_fields[x].type = "DATE" THEN
 				LET l_widget = "DateEdit"
 			ELSE
@@ -124,8 +128,9 @@ PRIVATE FUNCTION mk_form()
 			END IF
 			LET l_n_widget = l_n_formField.createChild(l_widget)
 			CALL l_n_widget.setAttribute("width", m_fld_props[x].len)
-			IF m_fld_props[x].widget = "ComboBox" THEN
-				CALL l_n_widget.setAttribute("initializer", m_fld_props[x].widget_props)
+			IF m_fld_props[x].widget = "CheckBox" THEN
+				CALL l_n_widget.setAttribute("valueChecked", m_fld_props[x].widget_prop1)
+				CALL l_n_widget.setAttribute("valueUnchecked", m_fld_props[x].widget_prop2)
 			END IF
 			CALL l_n_widget.setAttribute("posY", x )
 			CALL l_n_widget.setAttribute("posX", l_maxlablen+1 )
@@ -134,6 +139,7 @@ PRIVATE FUNCTION mk_form()
 			IF m_fld_props[x].numeric THEN
 				CALL l_n_widget.setAttribute("justify", "right")
 			END IF
+			CALL l_n_widget.setAttribute("hidden", m_fld_props[x].hidden)
 		END FOR
 		LET l_first_fld = l_first_fld + m_fld_per_page
 	END FOR
@@ -164,13 +170,45 @@ FUNCTION glm_combos()
 	END FOR
 END FUNCTION
 --------------------------------------------------------------------------------
+-- set a specific field to noEntry
+FUNCTION noEntryField(l_fldName STRING)
+	DEFINE x SMALLINT
+	FOR x = 1 TO m_fld_props.getLength()
+		IF m_fld_props[x].colname = l_fldName THEN
+			LET m_fld_props[x].noentry = TRUE
+		END IF
+	END FOR
+END FUNCTION
+--------------------------------------------------------------------------------
+-- Hide a specific field
+FUNCTION hideField(l_fldName STRING)
+	DEFINE x SMALLINT
+	FOR x = 1 TO m_fld_props.getLength()
+		IF m_fld_props[x].colname = l_fldName THEN
+			LET m_fld_props[x].hidden = TRUE
+		END IF
+	END FOR
+END FUNCTION
+--------------------------------------------------------------------------------
 -- set a specific field to a specific widget
-FUNCTION setWidget(l_fldName STRING, l_widget STRING, l_widget_prop STRING, f_init_cb t_init_cb) --l_widget_props STRING)
+FUNCTION setWidgetProps(l_fldName STRING, l_widget STRING, l_prop1 STRING, l_prop2 STRING)
 	DEFINE x SMALLINT
 	FOR x = 1 TO m_fld_props.getLength()
 		IF m_fld_props[x].colname = l_fldName THEN
 			LET m_fld_props[x].widget = l_widget
-			LET m_fld_props[x].widget_props = l_widget_prop
+			LET m_fld_props[x].widget_prop1 = l_prop1
+			LET m_fld_props[x].widget_prop2 = l_prop2
+			RETURN
+		END IF
+	END FOR
+END FUNCTION
+--------------------------------------------------------------------------------
+-- set a specific field to a specific widget
+FUNCTION setComboInitializer(l_fldName STRING, l_widget STRING, f_init_cb t_init_cb)
+	DEFINE x SMALLINT
+	FOR x = 1 TO m_fld_props.getLength()
+		IF m_fld_props[x].colname = l_fldName THEN
+			LET m_fld_props[x].widget = l_widget
 			LET m_fld_props[x].widget_callback = f_init_cb
 			RETURN
 		END IF
@@ -182,7 +220,8 @@ FUNCTION update_form_value(l_sql_handle base.SqlHandle)
 	DEFINE x SMALLINT
 	FOR x = 1 TO m_fld_props.getLength()
 		IF  m_fld_props[x].formFieldNode IS NOT NULL THEN
-			CALL m_fld_props[x].formFieldNode.setAttribute("value", l_sql_handle.getResultValue(x))
+			LET m_fld_props[x].value = l_sql_handle.getResultValue(x)
+			CALL m_fld_props[x].formFieldNode.setAttribute("value", m_fld_props[x].value.trim())
 		END IF
 	END FOR
 	CALL ui.Interface.refresh()
@@ -221,6 +260,8 @@ PRIVATE FUNCTION setProperties(l_fldno SMALLINT)
 	LET m_fld_props[l_fldno].len = l_len
 	LET m_fld_props[l_fldno].numeric = l_num
 	LET m_fld_props[l_fldno].iskey = (l_fldno = m_key_fld)
+	LET m_fld_props[l_fldno].hidden = FALSE
+	LET m_fld_props[l_fldno].noentry = FALSE
 END FUNCTION
 --------------------------------------------------------------------------------
 -- Upshift 1st letter : replace _ with space : split capitalised names

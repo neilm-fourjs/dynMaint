@@ -40,7 +40,8 @@ MAIN
 	LET glm_sql.m_row_count = 0
 	LET glm_sql.m_tab = "stock"
 	LET glm_sql.m_key_nam = "stock_code"
-	CALL glm_sql.glm_mkSQL("stock_code, stock_cat, supp_code, description, price","1=2") -- not fetching any data.
+--	CALL glm_sql.glm_mkSQL("stock_code, stock_cat, supp_code, description, price, cost","1=2") -- not fetching any data.
+	CALL glm_sql.glm_mkSQL("*","1=2") -- not fetching any data.
 
 -- create Form
 	CALL glm_mkForm.init_form(m_dbname, m_tab, glm_sql.m_key_fld, 20, glm_sql.m_fields) -- 10 fields by folder page
@@ -62,10 +63,14 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION custom_form_init()
 	DEFINE f_init_cb t_init_cb
-	DISPLAY "In custom_form_init"
 	LET f_init_cb = FUNCTION init_cb
-	CALL glm_mkForm.setWidget("stock_cat","ComboBox", "init_cb", f_init_cb)
-	CALL glm_mkForm.setWidget("supp_code","ComboBox", "init_cb", f_init_cb)
+	CALL glm_mkForm.setComboInitializer("stock_cat","ComboBox", f_init_cb)
+	CALL glm_mkForm.setComboInitializer("supp_code","ComboBox", f_init_cb)
+	CALL glm_mkForm.setWidgetProps("pack_flag","CheckBox","P","")
+	CALL glm_mkForm.hideField("cost")
+	CALL glm_mkForm.noEntryField("free_stock")
+	CALL glm_mkForm.noEntryField("physical_stock")
+	CALL glm_mkForm.noEntryField("allocated_stock")
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION init_cb( l_cb ui.ComboBox )
@@ -86,7 +91,7 @@ FUNCTION init_cb( l_cb ui.ComboBox )
 		FOREACH cb_cur INTO l_key, l_desc
 			IF l_key.trim().getLength() > 1 THEN
 				--DISPLAY "Key:",l_key.trim()," Desc:",l_desc.trim()
-				CALL l_cb.addItem( l_key, l_desc.trim() )
+				CALL l_cb.addItem( l_key.trim(), l_desc.trim() )
 			END IF
 		END FOREACH
 	END IF

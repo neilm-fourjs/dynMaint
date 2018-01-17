@@ -63,18 +63,27 @@ FUNCTION custom_form_init()
 	DEFINE f_init_cb t_init_cb
 	DISPLAY "In custom_form_init"
 	LET f_init_cb = FUNCTION init_cb
-	CALL glm_mkForm.setWidget("disc_code","ComboBox", "init_cb", f_init_cb)
+	CALL glm_mkForm.setComboInitializer("disc_code","ComboBox", f_init_cb)
 END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION init_cb( l_cb ui.ComboBox )
-	DEFINE l_d RECORD LIKE disc.*
+	DEFINE l_sql, l_key, l_desc STRING
 	IF l_cb IS NULL THEN
 		DISPLAY "init_cb passed NULL!"
 		RETURN
 	END IF
-	DISPLAY "Loading disc_code cb ..."
-	DECLARE cb_cur CURSOR FOR SELECT UNIQUE customer_disc FROM disc
-	FOREACH cb_cur INTO l_d.customer_disc
-		CALL l_cb.addItem( l_d.customer_disc CLIPPED, l_d.customer_disc CLIPPED )
-	END FOREACH
+	CASE l_cb.getColumnName()
+		WHEN "disc_code"
+			LET l_sql = "SELECT UNIQUE customer_disc FROM disc ORDER BY customer_disc"
+	END CASE
+	IF l_sql IS NOT NULL THEN
+		DISPLAY "Loading ComboBox for: ",l_cb.getColumnName()
+		DECLARE cb_cur CURSOR FROM l_sql
+		FOREACH cb_cur INTO l_key, l_desc
+			IF l_key.trim().getLength() > 1 THEN
+				--DISPLAY "Key:",l_key.trim()," Desc:",l_desc.trim()
+				CALL l_cb.addItem( l_key.trim(), l_desc.trim() )
+			END IF
+		END FOREACH
+	END IF
 END FUNCTION

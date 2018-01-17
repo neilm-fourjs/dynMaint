@@ -83,7 +83,9 @@ FUNCTION glm_inpt(l_new BOOLEAN)
 	ELSE
 		IF glm_sql.m_row_cur = 0 THEN RETURN END IF
 		FOR x = 1 TO m_fields.getLength()
-			CALL m_dialog.setFieldValue(glm_mkForm.m_fld_props[x].name, glm_sql.m_sql_handle.getResultValue(x))
+--			CALL m_dialog.setFieldValue(glm_mkForm.m_fld_props[x].name, glm_sql.m_sql_handle.getResultValue(x))
+			CALL m_dialog.setFieldValue(glm_mkForm.m_fld_props[x].name, glm_mkForm.m_fld_props[x].value )
+			DISPLAY glm_mkForm.m_fld_props[x].colname," = \"",glm_mkForm.m_fld_props[x].value,"\" AUI Value = \"",m_dialog.getFieldValue(glm_mkForm.m_fld_props[x].name),"\""
 			IF x = glm_sql.m_key_fld THEN
 				CALL m_dialog.setFieldActive(glm_sql.m_fields[x].colname, FALSE )
 			END IF

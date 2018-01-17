@@ -15,9 +15,13 @@ TYPE t_fld_props RECORD
 		len SMALLINT,
 		iskey BOOLEAN,
 		numeric BOOLEAN,
+		hidden BOOLEAN,
+		noentry BOOLEAN,
+		value STRING,
 		formFieldNode om.DomNode,
 		widget STRING,
-		widget_props STRING,
+		widget_prop1 STRING,
+		widget_prop2 STRING,
 		widget_callback t_init_cb
 	END RECORD
 
