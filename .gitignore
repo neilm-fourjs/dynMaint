@@ -26,6 +26,7 @@
 *.out
 *.tmp
 *.err
+*.bak
 
 # Packages
 *.tgz
@@ -35,9 +36,13 @@
 *.info
 *.apk
 *.gar
+*.zip
 
 # Other
 .directory
+bin
+bin310
+bin320
 distbin
 build
 *.build
