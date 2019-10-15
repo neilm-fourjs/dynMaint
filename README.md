@@ -6,7 +6,7 @@ To Do: locking, sample, listing report
 
 This demos also uses the g2_lib and njm_demo_db for the database and library code, so make sure to also check that out.
 
-On Linux you can use the makefile to build and run using the studio project file.
+You can build using the GeneroStudio project file or on Linux you can use the makefile ( which will use the GeneroStudio project file )
 
 
 Command Args:
