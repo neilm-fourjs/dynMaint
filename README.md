@@ -1,9 +1,12 @@
 # dynMaint
 Simple dynamic table maintenance program.
 
-
 Does: find, update, insert, delete
 To Do: locking, sample, listing report
+
+This demos also uses the g2_lib and njm_demo_db for the database and library code, so make sure to also check that out.
+
+On Linux you can use the makefile to build and run using the studio project file.
 
 
 Command Args:
@@ -24,3 +27,13 @@ Allowed Actions:
 
 The program will attempt to open a form with the name of dm_<dbname>_<tabname> if it fails it will generate a screen form dynamically.
 This means you can create some nice forms for important tables and have others to be dynamically generated.
+
+# Building:
+Set the Genero Environment then:
+```
+git clone git@github.com:neilm-fourjs/g2_lib.git
+git clone git@github.com:neilm-fourjs/njm_demo_db.git
+git clone git@github.com:neilm-fourjs/dynMaint.git
+cd dynMaint/
+make run
+```
