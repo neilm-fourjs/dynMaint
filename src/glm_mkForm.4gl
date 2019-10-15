@@ -37,6 +37,7 @@ FUNCTION init_form(
   END IF
   LET m_fields = l_fields
 
+	CALL ui.Interface.refresh()
   LET m_w = ui.Window.getCurrent()
 	IF m_w IS NULL THEN
 		DISPLAY "No current window????"
